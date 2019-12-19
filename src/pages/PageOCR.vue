@@ -19,6 +19,7 @@
 <script>
 /* eslint-disable */
 import { createWorker, PSM, OEM } from 'tesseract.js'
+import { match } from 'minimatch'
 const worker = createWorker({
   logger: m => console.log(m)
 })
@@ -28,7 +29,8 @@ export default {
       url: [],
       message: [],
       passport: '',
-      text: ''
+      text: '',
+      gender: ''
     }
   },
   methods: {
@@ -44,6 +46,15 @@ export default {
     },
     masukinValue(value) {
       this.message = value
+    },
+    indexesOf (string, regex) {
+      var math, indexes = {}
+      regex = new RegExp(regex)
+      while (math = regex.exec(string)) {
+        if (!indexes[match[0]]) indexes[match[0]] = []
+        indexes[match[0]].push(match.index)
+      }
+      return indexes
     },
      async recognize() {
       // debugger
@@ -61,12 +72,21 @@ export default {
       this.passport = text.substr(changedText)
       // debugger
       console.log(text)
-      var female = text.search('P')
-      console.log('female', female)
-      // if (female++ === 'F') {
-      //   console.log()
-      // }
-
+      // var female = text.search('P')
+      for (var i = 0;  i < text.length; i++) {
+        if (text[i] === 'P') {
+          var nexIndex = i + 2
+          if (text.charAt(nexIndex) === 'F') {
+            this.gender = 'female'
+          }
+        } else if (text[i] === 'L') {
+          var nexIndex = i + 2
+          if (text.charAt(nexIndex) === 'M') {
+            this.gender = 'male'
+          }
+        }
+      } 
+      console.log(this.gender)
       // debugger
       // console.log(text.search('p'))
       self.message = changedText
